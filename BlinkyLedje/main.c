@@ -9,7 +9,7 @@
 #include <util/delay.h>
 #include <stdio.h>
 
-
+//Comments toevoegen is super vet
 
 int main() {
 	DDRB = 0b11111111;
