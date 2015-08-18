@@ -31,10 +31,11 @@ int thermistorPin = A1;
 int thermistorValue;
 int miliVolts;
 int temperature;
+
 int tempLaagPot = A3;
 int tempHoogPot = A4;
-int valueLaag;
-int valueHoog;
+
+
 
 //                BS  E  D4 D5  D6 D7
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
@@ -82,7 +83,7 @@ void loop()
   temperature = miliVoltsToTemp(miliVolts); // De temperatuur wordt gemeten met behulp van een thermsistor.
 
   lcd.setCursor(0, 0);
-  lcd.print("Temp:     C  ");
+  lcd.print("Temp:     °C  ");
   lcd.setCursor(6, 0);
   lcd.print(temperature); //Hier wordt de temperatuur op het LCD Display geprint op de eerste regel.
 
@@ -91,25 +92,29 @@ void loop()
   delay(50);
 
   int tempValueLaag = analogRead(tempLaagPot);// hier komt een getal uit tussen de 0 en 1023 // omdat de imput voltage tussen de 0 en 5 volt is.
+  int minValue = tempLaagPot / 20;  // ingestelde temperatuur minimum. 1023 is het uiterste, als men dit deelt door 20 zal hier grofweg 50 uitkomen. 
+                                    // Dit is een realistische temperatuur.
+    
   lcd.setCursor(0, 1);
   lcd.print("Min Temp:    ");
   lcd.setCursor(10, 1);
-  lcd.print(tempValueLaag);
-  delay(100);
+  lcd.print(minValue);
+  delay(100); //Laat de ingestelde temperatuur zien op de eerste regel van de LCD
 
   
   int tempValueHoog = analogRead(tempHoogPot); 
+  int maxValue = tempHoogPot / 20;  // ingestelde temperatuur maximum
   
   lcd.setCursor(0, 1);
   lcd.print("Max Temp:    ");
   lcd.setCursor(10, 1);
-  lcd.print(tempValueHoog);
-  delay(100);
+  lcd.print(maxValue);
+  delay(100); // Laat de ingestelde temperatuur zien op de eerste regel van de LCD
 
 
   
   
-  if (temperature > valueHoog) {  //Als de temperatuur boven het ingestelde maximum komt zal hier iets gebeuren.
+  if (temperature > maxValue) {  //Als de temperatuur boven het ingestelde maximum komt zal hier iets gebeuren.
 
     if (geluid == 0) {
       soundOpen();
@@ -140,7 +145,7 @@ void loop()
   }
 
 
-  if (temperature < valueLaag) {
+  if (temperature < minValue) {
 
     if (geluid == 1) {
       soundDicht();
