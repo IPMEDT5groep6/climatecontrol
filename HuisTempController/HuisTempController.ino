@@ -79,12 +79,12 @@ void loop()
 {
   thermistorValue = analogRead(thermistorPin);
   miliVolts = analogToMilliVolts(thermistorValue);
-  temperature = miliVoltsToTemp(miliVolts);
+  temperature = miliVoltsToTemp(miliVolts); // De temperatuur wordt gemeten met behulp van een thermsistor.
 
   lcd.setCursor(0, 0);
   lcd.print("Temp:     C  ");
   lcd.setCursor(6, 0);
-  lcd.print(temperature);
+  lcd.print(temperature); //Hier wordt de temperatuur op het LCD Display geprint op de eerste regel.
 
   lcd.setCursor(0, 1);
   lcd.print("Raam:");
@@ -109,7 +109,7 @@ void loop()
 
   
   
-  if (temperature > valueHoog) {
+  if (temperature > valueHoog) {  //Als de temperatuur boven het ingestelde maximum komt zal hier iets gebeuren.
 
     if (geluid == 0) {
       soundOpen();
@@ -132,7 +132,8 @@ void loop()
       lcd.setCursor(0, 1);
       lcd.print("Raam:   ");
       lcd.setCursor(6, 1);
-      lcd.print(raamPos);
+      lcd.print(raamPos);  // Eerst wordt een deuntje gespeeld, daarna gaat het raam naar zijn nieuwe positie.
+                           // Vervolgens wordt er op de LCD getoont wat de huidige temperatuur is en wat de status van het raam is.
     }
 
     delay(25);
@@ -161,7 +162,8 @@ void loop()
       lcd.setCursor(0, 1);
       lcd.print("Raam:   ");
       lcd.setCursor(6, 1);
-      lcd.print(raamPos);
+      lcd.print(raamPos);  //Hier wordt hetzelfde gedaan als in de 'raam open IF'
+                           //
     }
 
     delay(25);
