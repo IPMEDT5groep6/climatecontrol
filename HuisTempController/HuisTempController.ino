@@ -27,6 +27,10 @@ int ledPinaan = 6;
 int ledPinuit = 7;
 int buttonApin = 40;
 int buttonBpin = 42;
+
+int remoteButtonPinA = 41;
+int remoteButtonPinB = 43;
+
 int thermistorPin = A1;
 int thermistorValue;
 int miliVolts;
@@ -83,7 +87,7 @@ void loop()
   temperature = miliVoltsToTemp(miliVolts); // De temperatuur wordt gemeten met behulp van een thermsistor.
 
   lcd.setCursor(0, 0);
-  lcd.print("Temp:     °C  ");
+  lcd.print("Temp:     C  ");
   lcd.setCursor(6, 0);
   lcd.print(temperature); //Hier wordt de temperatuur op het LCD Display geprint op de eerste regel.
 
@@ -94,6 +98,9 @@ void loop()
   int tempValueLaag = analogRead(tempLaagPot);// hier komt een getal uit tussen de 0 en 1023 // omdat de imput voltage tussen de 0 en 5 volt is.
   int minValue = tempLaagPot / 20;  // ingestelde temperatuur minimum. 1023 is het uiterste, als men dit deelt door 20 zal hier grofweg 50 uitkomen. 
                                     // Dit is een realistische temperatuur.
+
+  Serial.print("Potmeter reading: ");
+  Serial.println(minValue);
     
   lcd.setCursor(0, 1);
   lcd.print("Min Temp:    ");
@@ -104,6 +111,8 @@ void loop()
   
   int tempValueHoog = analogRead(tempHoogPot); 
   int maxValue = tempHoogPot / 20;  // ingestelde temperatuur maximum
+  Serial.print("Potmeter reading: ");
+  Serial.println(maxValue);
   
   lcd.setCursor(0, 1);
   lcd.print("Max Temp:    ");
@@ -176,8 +185,9 @@ void loop()
 
   }
 
-
-  // Display Light on second row
+  remoteRaamOpen();
+  remoteRaamDicht();
+  
   knopRaamOpen();
   knopRaamDicht();
 }
@@ -211,6 +221,58 @@ void knopRaamDicht() {
   if (digitalRead(buttonApin) == LOW)
   {
     Serial.println("Knop gedrukt, raam dicht");
+    digitalWrite(ledPinaan, HIGH);
+    digitalWrite(ledPinuit, LOW);
+    myservoR.write(175);
+
+    soundDicht();
+    raam = 0;
+
+    if (raam == 0) {
+
+      raamPos = "Dicht";
+      lcd.setCursor(0, 1);
+      lcd.print("Raam:   ");
+      lcd.setCursor(6, 1);
+      lcd.print(raamPos);
+    }
+
+    delay(5000);
+
+
+  }
+}
+
+void remoteRaamOpen() {
+  if (digitalRead(remoteButtonPinA) == LOW)
+  {
+    Serial.println("Remote knop gedrukt, raam open");
+    digitalWrite(ledPinaan, HIGH);
+    digitalWrite(ledPinuit, LOW);
+    myservoR.write(175);
+
+    soundDicht();
+    raam = 0;
+
+    if (raam == 0) {
+
+      raamPos = "Dicht";
+      lcd.setCursor(0, 1);
+      lcd.print("Raam:   ");
+      lcd.setCursor(6, 1);
+      lcd.print(raamPos);
+    }
+
+    delay(5000);
+
+
+  }
+}
+
+void remoteRaamDicht() {
+  if (digitalRead(remoteButtonPinB) == LOW)
+  {
+    Serial.println("Rremote knop gedrukt, raam dicht");
     digitalWrite(ledPinaan, HIGH);
     digitalWrite(ledPinuit, LOW);
     myservoR.write(175);
