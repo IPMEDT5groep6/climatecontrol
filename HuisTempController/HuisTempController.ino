@@ -27,49 +27,59 @@ int ledPinaan = 6;
 int ledPinuit = 7;
 int buttonApin = 40;
 int buttonBpin = 42;
+
+int remoteButtonPinA = 41;
+int remoteButtonPinB = 43;
+
 int thermistorPin = A1;
 int thermistorValue;
 int miliVolts;
 int temperature;
+
 int tempLaagPot = A3;
 int tempHoogPot = A4;
-int valueLaag;
-int valueHoog;
+
+int valueMin = 10;
+int valueMax = 40;
+
+
 
 //                BS  E  D4 D5  D6 D7
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-    // Noten voor het geluidje:
-    int melody1[] = {
-      // NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0,
-      NOTE_B3, NOTE_C4
-    };
+// Noten voor het geluidje:
+int melody1[] = {
+  // NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0,
+  NOTE_B3, NOTE_C4
+};
 
-    // noot duur: 4 = Kwart noot, 8 = achtste noot, etc.:
-    int noteDurations1[] = {
-      //8, 4, 8, 4, 8, 4,
-      8, 4
-    };
+// noot duur: 4 = Kwart noot, 8 = achtste noot, etc.:
+int noteDurations1[] = {
+  //8, 4, 8, 4, 8, 4,
+  8, 4
+};
 
-    // Noten voor het geluidje:
-    int melody2[] = {
-      // NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0,
-      NOTE_C4, NOTE_B3
-    };
+// Noten voor het geluidje:
+int melody2[] = {
+  // NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0,
+  NOTE_C4, NOTE_B3
+};
 
-    // noot duur: 4 = Kwart noot, 8 = achtste noot, etc.:
-    int noteDurations2[] = {
-      //8, 4, 8, 4, 8, 4,
-      8, 4
-    };
+// noot duur: 4 = Kwart noot, 8 = achtste noot, etc.:
+int noteDurations2[] = {
+  //8, 4, 8, 4, 8, 4,
+  8, 4
+};
 
 
 void setup()
 {
   lcd.begin(16, 2);
-  myservoR.attach(13);  // Servo voor rechter raam , op pin 9 (PWM Pin)
+  myservoR.attach(9);  // Servo voor rechter raam , op pin 9 (PWM Pin)
   pinMode(buttonApin, INPUT_PULLUP);
   pinMode(buttonBpin, INPUT_PULLUP);
+  pinMode(remoteButtonPinA, INPUT_PULLUP);
+  pinMode(remoteButtonPinB, INPUT_PULLUP);
   pinMode(ledPinaan, OUTPUT);
   pinMode(ledPinuit, OUTPUT);
   Serial.begin(9600);
@@ -81,35 +91,64 @@ void loop()
   miliVolts = analogToMilliVolts(thermistorValue);
   temperature = miliVoltsToTemp(miliVolts); // De temperatuur wordt gemeten met behulp van een thermsistor.
 
+  Serial.print("Temperatuur: ");
+  Serial.println(temperature);
+  Serial.print("Servo Reading: ");
+  Serial.println(myservoR.read());
+  Serial.print("Status Ramen: ");
+  Serial.println(raamPos);
+
   lcd.setCursor(0, 0);
-  lcd.print("Temp:     C  ");
+  lcd.print("Temp:    C  ");
   lcd.setCursor(6, 0);
   lcd.print(temperature); //Hier wordt de temperatuur op het LCD Display geprint op de eerste regel.
 
   lcd.setCursor(0, 1);
-  lcd.print("Raam:");
+  lcd.print("Ramen: ");
+  lcd.setCursor(7, 1);
+  lcd.print(raamPos);
   delay(50);
 
-  int tempValueLaag = analogRead(tempLaagPot);// hier komt een getal uit tussen de 0 en 1023 // omdat de imput voltage tussen de 0 en 5 volt is.
-  lcd.setCursor(0, 1);
-  lcd.print("Min Temp:    ");
-  lcd.setCursor(10, 1);
-  lcd.print(tempValueLaag);
-  delay(100);
+  int tempValueMin = analogRead(tempLaagPot);// hier komt een getal uit tussen de 0 en 1023 // omdat de imput voltage tussen de 0 en 5 volt is.
+  tempValueMin = map(tempValueMin, 0, 1023, 0, 50); // Deze functie zorgt dat de potmeter niet van 0 naar 1023 gaat maar van 0 naar 50
+  // 0 tot 50 is een realistische marge om te gebruiken voor temperatuur
 
-  
-  int tempValueHoog = analogRead(tempHoogPot); 
-  
-  lcd.setCursor(0, 1);
-  lcd.print("Max Temp:    ");
-  lcd.setCursor(10, 1);
-  lcd.print(tempValueHoog);
-  delay(100);
+  Serial.print("Potmeter reading minimum temp: ");
+  Serial.println(tempValueMin);
+
+  if (tempValueMin != valueMin) {
+
+    lcd.setCursor(0, 1);
+    lcd.print("Min Temp:     ");
+    lcd.setCursor(10, 1);
+    lcd.print(tempValueMin);
+    delay(1000); //Laat de ingestelde temperatuur zien op de eerste regel van de LCD
+
+  }
 
 
-  
-  
-  if (temperature > valueHoog) {  //Als de temperatuur boven het ingestelde maximum komt zal hier iets gebeuren.
+  valueMin = tempValueMin;
+
+  int tempValueMax = analogRead(tempHoogPot);
+  tempValueMax = map(tempValueMax, 0, 1023, 0, 50);
+
+
+  Serial.print("Potmeter reading maximum temp: ");
+  Serial.println(tempValueMax);
+
+  if (tempValueMax != valueMax) {
+
+    lcd.setCursor(0, 1);
+    lcd.print("Max Temp:     ");
+    lcd.setCursor(10, 1);
+    lcd.print(tempValueMax);
+    delay(1000); // Laat de ingestelde temperatuur zien op de eerste regel van de LCD
+
+  }
+
+  valueMax = tempValueMax;
+
+  if (temperature > tempValueMax) {  //Als de temperatuur boven het ingestelde maximum komt zal hier iets gebeuren.
 
     if (geluid == 0) {
       soundOpen();
@@ -130,17 +169,17 @@ void loop()
 
       raamPos = "Open ";
       lcd.setCursor(0, 1);
-      lcd.print("Raam:   ");
-      lcd.setCursor(6, 1);
+      lcd.print("Ramen:     ");
+      lcd.setCursor(7, 1);
       lcd.print(raamPos);  // Eerst wordt een deuntje gespeeld, daarna gaat het raam naar zijn nieuwe positie.
-                           // Vervolgens wordt er op de LCD getoont wat de huidige temperatuur is en wat de status van het raam is.
+      // Vervolgens wordt er op de LCD getoont wat de huidige temperatuur is en wat de status van het raam is.
     }
 
     delay(25);
   }
 
 
-  if (temperature < valueLaag) {
+  if (temperature < tempValueMin) {
 
     if (geluid == 1) {
       soundDicht();
@@ -158,12 +197,12 @@ void loop()
 
     if (raam == 0) {
 
-      raamPos = "Dicht";
+      raamPos = "Dicht  ";
       lcd.setCursor(0, 1);
-      lcd.print("Raam:   ");
-      lcd.setCursor(6, 1);
+      lcd.print("Ramen:   ");
+      lcd.setCursor(7, 1);
       lcd.print(raamPos);  //Hier wordt hetzelfde gedaan als in de 'raam open IF'
-                           //
+      //
     }
 
     delay(25);
@@ -171,8 +210,9 @@ void loop()
 
   }
 
+  remoteRaamOpen();
+  remoteRaamDicht();
 
-  // Display Light on second row
   knopRaamOpen();
   knopRaamDicht();
 }
@@ -180,7 +220,7 @@ void knopRaamOpen() {
 
   if (digitalRead(buttonBpin) == LOW)
   {
-    Serial.println("Knop gedrukt, raam open");
+    Serial.println("Knop gedrukt, ramen open");
     digitalWrite(ledPinaan, LOW);
     digitalWrite(ledPinuit, HIGH);
     myservoR.write(40);
@@ -190,10 +230,11 @@ void knopRaamOpen() {
 
     if (raam == 1) {
 
+
       raamPos = "Open ";
       lcd.setCursor(0, 1);
-      lcd.print("Raam:   ");
-      lcd.setCursor(6, 1);
+      lcd.print("Ramen:   ");
+      lcd.setCursor(7, 1);
       lcd.print(raamPos);
     }
 
@@ -205,7 +246,7 @@ void knopRaamOpen() {
 void knopRaamDicht() {
   if (digitalRead(buttonApin) == LOW)
   {
-    Serial.println("Knop gedrukt, raam dicht");
+    Serial.println("Knop gedrukt, ramen dicht");
     digitalWrite(ledPinaan, HIGH);
     digitalWrite(ledPinuit, LOW);
     myservoR.write(175);
@@ -217,8 +258,60 @@ void knopRaamDicht() {
 
       raamPos = "Dicht";
       lcd.setCursor(0, 1);
-      lcd.print("Raam:   ");
-      lcd.setCursor(6, 1);
+      lcd.print("Ramen:   ");
+      lcd.setCursor(7, 1);
+      lcd.print(raamPos);
+    }
+
+    delay(5000);
+
+
+  }
+}
+
+void remoteRaamOpen() {
+  if (digitalRead(remoteButtonPinA) == LOW)
+  {
+    Serial.println("Remote knop gedrukt, ramen open");
+    digitalWrite(ledPinaan, LOW);
+    digitalWrite(ledPinuit, HIGH);
+    myservoR.write(40);
+
+    soundOpen();
+    raam = 1;
+
+    if (raam == 1) {
+
+      raamPos = " Open";
+      lcd.setCursor(0, 1);
+      lcd.print("Ramen:   ");
+      lcd.setCursor(7, 1);
+      lcd.print(raamPos);
+    }
+
+    delay(5000);
+
+
+  }
+}
+
+void remoteRaamDicht() {
+  if (digitalRead(remoteButtonPinB) == LOW)
+  {
+    Serial.println("Remote knop gedrukt, ramen dicht");
+    digitalWrite(ledPinaan, HIGH);
+    digitalWrite(ledPinuit, LOW);
+    myservoR.write(175);
+
+    soundDicht();
+    raam = 0;
+
+    if (raam == 0) {
+
+      raamPos = "Dicht";
+      lcd.setCursor(0, 1);
+      lcd.print("Ramen:   ");
+      lcd.setCursor(7, 1);
       lcd.print(raamPos);
     }
 
