@@ -96,34 +96,34 @@ void loop()
   delay(50);
 
   int tempValueLaag = analogRead(tempLaagPot);// hier komt een getal uit tussen de 0 en 1023 // omdat de imput voltage tussen de 0 en 5 volt is.
-  int minValue = tempLaagPot / 20;  // ingestelde temperatuur minimum. 1023 is het uiterste, als men dit deelt door 20 zal hier grofweg 50 uitkomen. 
-                                    // Dit is een realistische temperatuur.
+  tempValueLaag = map(tempValueLaag, 0, 1023, 0, 50); // Deze functie zorgt dat de potmeter niet van 0 naar 1023 gaat maar van 0 naar 50
+                                                      // 0 tot 50 is een realistische marge om te gebruiken voor temperatuur
 
   Serial.print("Potmeter reading: ");
-  Serial.println(minValue);
+  Serial.println(tempValueLaag);
     
   lcd.setCursor(0, 1);
   lcd.print("Min Temp:    ");
   lcd.setCursor(10, 1);
-  lcd.print(minValue);
+  lcd.print(tempValueLaag);
   delay(100); //Laat de ingestelde temperatuur zien op de eerste regel van de LCD
 
   
   int tempValueHoog = analogRead(tempHoogPot); 
-  int maxValue = tempHoogPot / 20;  // ingestelde temperatuur maximum
+  tempValueHoog = map(tempValueHoog, 0, 1023, 0, 50);
   Serial.print("Potmeter reading: ");
-  Serial.println(maxValue);
+  Serial.println(tempValueHoog);
   
   lcd.setCursor(0, 1);
   lcd.print("Max Temp:    ");
   lcd.setCursor(10, 1);
-  lcd.print(maxValue);
+  lcd.print(tempValueHoog);
   delay(100); // Laat de ingestelde temperatuur zien op de eerste regel van de LCD
 
 
   
   
-  if (temperature > maxValue) {  //Als de temperatuur boven het ingestelde maximum komt zal hier iets gebeuren.
+  if (temperature > tempValueHoog) {  //Als de temperatuur boven het ingestelde maximum komt zal hier iets gebeuren.
 
     if (geluid == 0) {
       soundOpen();
@@ -154,7 +154,7 @@ void loop()
   }
 
 
-  if (temperature < minValue) {
+  if (temperature < tempValueLaag) {
 
     if (geluid == 1) {
       soundDicht();
