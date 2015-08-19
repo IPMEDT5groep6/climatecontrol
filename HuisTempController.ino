@@ -93,6 +93,10 @@ void loop()
 
   Serial.print("Temperatuur: ");
   Serial.println(temperature);
+  Serial.print("Servo Reading: ");
+  Serial.println(myservoR.read());
+  Serial.print("Status Ramen: ");
+  Serial.println(raamPos);
 
   lcd.setCursor(0, 0);
   lcd.print("Temp:    C  ");
@@ -109,33 +113,33 @@ void loop()
   tempValueMin = map(tempValueMin, 0, 1023, 0, 50); // Deze functie zorgt dat de potmeter niet van 0 naar 1023 gaat maar van 0 naar 50
   // 0 tot 50 is een realistische marge om te gebruiken voor temperatuur
 
-  Serial.print("Potmeter reading minimum: ");
+  Serial.print("Potmeter reading minimum temp: ");
   Serial.println(tempValueMin);
 
   if (tempValueMin != valueMin) {
 
     lcd.setCursor(0, 1);
-    lcd.print("Min Temp:    ");
+    lcd.print("Min Temp:     ");
     lcd.setCursor(10, 1);
     lcd.print(tempValueMin);
     delay(1000); //Laat de ingestelde temperatuur zien op de eerste regel van de LCD
 
   }
 
-  
+
   valueMin = tempValueMin;
 
   int tempValueMax = analogRead(tempHoogPot);
   tempValueMax = map(tempValueMax, 0, 1023, 0, 50);
 
 
-  Serial.print("Potmeter reading maximum: ");
+  Serial.print("Potmeter reading maximum temp: ");
   Serial.println(tempValueMax);
 
   if (tempValueMax != valueMax) {
 
     lcd.setCursor(0, 1);
-    lcd.print("Max Temp:    ");
+    lcd.print("Max Temp:     ");
     lcd.setCursor(10, 1);
     lcd.print(tempValueMax);
     delay(1000); // Laat de ingestelde temperatuur zien op de eerste regel van de LCD
@@ -226,6 +230,7 @@ void knopRaamOpen() {
 
     if (raam == 1) {
 
+
       raamPos = "Open ";
       lcd.setCursor(0, 1);
       lcd.print("Ramen:   ");
@@ -273,9 +278,9 @@ void remoteRaamOpen() {
     myservoR.write(40);
 
     soundOpen();
-    raam = 0;
+    raam = 1;
 
-    if (raam == 0) {
+    if (raam == 1) {
 
       raamPos = " Open";
       lcd.setCursor(0, 1);
